@@ -1,0 +1,28 @@
+from sentence_transformers import SentenceTransformer
+import faiss
+import numpy as np
+
+# Load embedding model
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+# Load text chunks
+with open("vector_store/chunks.txt", "r", encoding="utf-8") as f:
+    chunks = [line.strip() for line in f.readlines()]
+
+# Create embeddings
+embeddings = model.encode(chunks)
+
+# Convert to numpy
+embeddings = np.array(embeddings).astype("float32")
+
+# Create FAISS index
+dimension = embeddings.shape[1]
+index = faiss.IndexFlatL2(dimension)
+
+# Add vectors
+index.add(embeddings)
+
+# Save index
+faiss.write_index(index, "vector_store/faiss_index")
+
+print("✅ FAISS index created successfully")
